@@ -151,6 +151,12 @@ unless defined? Ezgraphix
       def rand_color
         COLORS[rand(Graphic::COLORS.size - 1)]
       end
+      
+      #Returns the color to be used for rendering the data in the chart. If no
+      #color is specified a random color will be chosen for each data entry
+      def color
+        self.render_options[:color] || rand_color
+      end
 
       #Builds the xml to feed the chart.
       def to_xml
@@ -167,7 +173,12 @@ unless defined? Ezgraphix
         elsif !['msline', 'mscol2d', 'msbar2d', 'mscol3d'].include?(self.c_type)
           escaped_xml = g_xml.graph(options) do
             self.data.each{ |k,v|
-              g_xml.set :value => v, :name => k, :color => self.rand_color
+              case v
+              when Hash
+                g_xml.set v.merge(:color => self.color)
+              else
+                g_xml.set :value => v, :name => k, :color => self.color
+              end
             }
           end
         else
@@ -179,7 +190,7 @@ unless defined? Ezgraphix
               end
             end
             for d in self.data
-              g_xml.dataset(:color => self.rand_color, :seriesName => d.first ) do
+              g_xml.dataset(:color => self.color, :seriesName => d.first ) do
                 d[1].each do |v|
                 g_xml.set :value => v
                 end

@@ -78,4 +78,35 @@ describe Graphic do
     get_style(@g).should == 'render_simple'
   end
   
+  it "should have valid data when specified in the constructor" do
+    g = Graphic.new(:data => {:ruby => 1, :perl => 2, :smalltalk => 3})
+    g.data.values_at(:ruby, :perl, :smalltalk).should == [1,2,3]
+  end
+  
+  it "should not show random colors if specified so" do
+    g = Graphic.new(:color => "FFFF00")
+    g.color.should == "FFFF00"
+  end
+  
+  it "should render the right subcaption text" do
+    g = Graphic.new(:subcaption => "This is a test")
+    g.to_s.should match(/subCaption='This is a test'/)
+  end
+  
+  it "should set the link and the hover texts" do
+    g = Graphic.new
+    g.data = {
+               "Google" => {
+                 :value => 1, :link => "http://google.com", :hoverText => "Click to go to google"
+               },
+               "Hotmail" => {
+                 :value => 2, :link => "http://hotmail.com", :hoverText => "Click to go to hotmail"
+               }
+             }
+    g.to_s.should match(%r{link='http://google.com'})
+    g.to_s.should match(%r{link='http://hotmail.com'})
+    g.to_s.should match(%r{hoverText='Click to go to google'})
+    g.to_s.should match(%r{hoverText='Click to go to hotmail'})
+  end
+  
 end
