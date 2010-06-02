@@ -162,28 +162,24 @@ unless defined? Ezgraphix
       def to_xml
         options = parse_options(self.render_options)
         g_xml = Builder::XmlMarkup.new
-        #For single series charts
-        if ["area2d"].include? self.c_type
-          # These graphics should be one color only
-          escaped_xml = g_xml.graph(options) do
+        escaped_xml = g_xml.graph(options) do
+          #For single series charts
+          if ["area2d"].include? self.c_type
+            # These graphics should be one color only
             self.data.each{ |k,v|
               g_xml.set :value => v, :name => k
             }
-          end
-        elsif !['msline', 'mscol2d', 'msbar2d', 'mscol3d'].include?(self.c_type)
-          escaped_xml = g_xml.graph(options) do
+          elsif !['msline', 'mscol2d', 'msbar2d', 'mscol3d'].include?(self.c_type)
             self.data.each{ |k,v|
               case v
               when Hash
-                g_xml.set v.merge(:color => self.color)
+                g_xml.set v.reverse_merge(:color => self.color)
               else
                 g_xml.set :value => v, :name => k, :color => self.color
               end
             }
-          end
-        else
-        #For multiseries charts
-          escaped_xml = g_xml.graph(options) do
+          else
+          #For multiseries charts
             g_xml.categories do
               for label in self.labels
                 g_xml.category :name  => label
@@ -195,6 +191,13 @@ unless defined? Ezgraphix
                 g_xml.set :value => v
                 end
               end
+            end
+          end
+          
+          # Trend lines
+          g_xml.trendLines do
+            (self.render_options[:lines] || []).each do |line|
+              g_xml.line line
             end
           end
         end
